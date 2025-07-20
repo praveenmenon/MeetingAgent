@@ -93,8 +93,19 @@ class AIClient:
                 messages=[{"role": "user", "content": user_prompt}]
             )
             
-            similar_ids = json.loads(response.content[0].text)
-            return similar_ids
+            response_text = response.content[0].text.strip()
+            
+            # Try to extract JSON from response
+            import re
+            json_match = re.search(r'\[.*?\]', response_text, re.DOTALL)
+            if json_match:
+                json_str = json_match.group()
+                similar_ids = json.loads(json_str)
+                return similar_ids
+            else:
+                # Fallback: try parsing the entire response
+                similar_ids = json.loads(response_text)
+                return similar_ids
             
         except Exception as e:
             print(f"Claude similarity check error: {e}")
@@ -119,3 +130,37 @@ class AIClient:
         )
         
         return response.choices[0].message.content
+    
+    def suggest_tasks_from_meeting(self, notes: str, meeting_title: str) -> List[dict]:
+        """Generate task suggestions based on meeting content"""
+        system_prompt = (
+            "Based on the meeting notes, suggest 3-5 relevant tasks that should be created. "
+            "Return a JSON list of task objects with the following structure: "
+            "{"
+            "  \"title\": \"Task description\", "
+            "  \"priority\": \"High|Medium|Low\", "
+            "  \"suggested_due_date\": \"YYYY-MM-DD or relative like '1 week' or empty string\", "
+            "  \"reason\": \"Why this task is needed based on the meeting\""
+            "} "
+            "Focus on follow-up actions, deliverables, preparations for next meeting, "
+            "documentation needs, communication tasks, or process improvements mentioned. "
+            "Only suggest realistic, actionable tasks that stem from the meeting content."
+        )
+        
+        user_prompt = f"Meeting Title: {meeting_title}\n\nMeeting Notes:\n{notes}"
+        
+        try:
+            response = self.openai_client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ]
+            )
+            
+            suggested_tasks = json.loads(response.choices[0].message.content)
+            return suggested_tasks if isinstance(suggested_tasks, list) else []
+            
+        except Exception as e:
+            print(f"Error generating task suggestions: {e}")
+            return []

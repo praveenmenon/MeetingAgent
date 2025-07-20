@@ -19,10 +19,11 @@ class UserInterface:
             else:
                 return input(f"Enter {property_name} (no options available, add new): ").strip() or None
         
-        print(f"Options for {property_name}:")
+        print(f"\nOptions for {property_name}:")
         for i, opt in enumerate(options, 1):
             print(f"{i}. {opt}")
         print(f"{len(options)+1}. Add new option")
+        print()
         
         if multi:
             selections = []
@@ -60,7 +61,7 @@ class UserInterface:
     
     def display_similar_meetings(self, similar_meetings: List[dict]) -> None:
         """Display similar meetings to the user"""
-        print("Possible similar meetings:")
+        print("\nPossible similar meetings:")
         for meeting in similar_meetings:
             details = meeting
             desc_preview = details['description'][:100] + "..." if len(details['description']) > 100 else details['description']
@@ -78,9 +79,9 @@ class UserInterface:
     def display_task_creation_summary(self, task_count: int) -> None:
         """Display summary of task creation"""
         if task_count > 0:
-            print(f"✓ Successfully created and linked {task_count} tasks to the meeting.")
+            print(f"\n✓ Successfully created and linked {task_count} tasks to the meeting.")
         else:
-            print("No tasks were created.")
+            print("\nNo tasks were created.")
     
     def get_task_due_date(self, task_desc: str) -> Optional[str]:
         """Get due date for a task"""
@@ -110,10 +111,122 @@ class UserInterface:
     
     def display_action_items(self, action_items: List[str]) -> None:
         """Display found action items"""
-        print(f"Found {len(action_items)} action items in notes:")
+        print(f"\nFound {len(action_items)} action items in notes:")
         for i, action in enumerate(action_items, 1):
             print(f"{i}. {action}")
     
     def get_user_input(self, prompt: str) -> str:
         """Get user input with prompt"""
-        return input(prompt)
+        print(prompt)
+        print("(Type your content, then press Ctrl+D on Unix/Mac or Ctrl+Z on Windows to finish)")
+        lines = []
+        try:
+            while True:
+                line = input()
+                lines.append(line)
+        except EOFError:
+            pass
+        return '\n'.join(lines)
+    
+    def ask_to_add_tasks(self) -> bool:
+        """Ask user if they want to add tasks to the meeting"""
+        response = input("Would you like to add tasks based on this meeting? (y/n): ").lower()
+        return response == 'y'
+    
+    def display_task_suggestions(self, suggested_tasks: List[dict], action_items: List[str]) -> None:
+        """Display AI-suggested tasks and action items"""
+        print("\n📋 Task Options:")
+        
+        option_num = 1
+        available_options = []
+        
+        # Display action items if found
+        if action_items:
+            print(f"\n{option_num}. Action Items from meeting notes ({len(action_items)} items):")
+            for i, action in enumerate(action_items, 1):
+                print(f"   {i}. {action}")
+            available_options.append(str(option_num))
+            option_num += 1
+        
+        # Display AI suggestions
+        if suggested_tasks:
+            print(f"\n{option_num}. AI-suggested tasks based on meeting content ({len(suggested_tasks)} items):")
+            for i, task in enumerate(suggested_tasks, 1):
+                priority_indicator = "🔴" if task.get('priority') == 'High' else "🟡" if task.get('priority') == 'Medium' else "🟢"
+                due_date = f" (suggested: {task.get('suggested_due_date', 'No suggestion')})" if task.get('suggested_due_date') else ""
+                print(f"   {i}. {priority_indicator} {task.get('title', '')}{due_date}")
+                if task.get('reason'):
+                    print(f"      Reason: {task.get('reason', '')}")
+            available_options.append(str(option_num))
+            option_num += 1
+        
+        # Always show custom tasks option
+        print(f"\n{option_num}. Add custom tasks manually")
+        available_options.append(str(option_num))
+        
+        # Store available options for validation
+        self._available_options = available_options
+        self._has_action_items = bool(action_items)
+        self._has_ai_suggestions = bool(suggested_tasks)
+        
+        if len(available_options) > 1:
+            print(f"\nYou can select multiple options (e.g., '{','.join(available_options[:2])}' or '{available_options[0]},{available_options[-1]}')")
+        else:
+            print(f"\nSelect option {available_options[0]} or press Enter to skip")
+    
+    def get_task_selection(self) -> List[str]:
+        """Get user's selection of which task options to use"""
+        available_options = getattr(self, '_available_options', ['1'])
+        has_action_items = getattr(self, '_has_action_items', False)
+        has_ai_suggestions = getattr(self, '_has_ai_suggestions', False)
+        
+        while True:
+            valid_options_str = ', '.join(available_options)
+            choice = input(f"Select options ({valid_options_str}) or press Enter to skip: ").strip()
+            
+            if not choice:
+                return []
+            
+            try:
+                selections = []
+                for num_str in choice.split(','):
+                    num = int(num_str.strip())
+                    
+                    if str(num) not in available_options:
+                        print(f"Invalid option: {num}. Please use {valid_options_str}.")
+                        break
+                    
+                    # Map option number to selection type
+                    option_index = 1
+                    
+                    if has_action_items and num == option_index:
+                        selections.append('action_items')
+                        continue
+                    elif has_action_items:
+                        option_index += 1
+                    
+                    if has_ai_suggestions and num == option_index:
+                        selections.append('ai_suggestions')
+                        continue
+                    elif has_ai_suggestions:
+                        option_index += 1
+                    
+                    # Custom tasks option (always last)
+                    if num == option_index:
+                        selections.append('custom')
+                        continue
+                else:
+                    return selections
+                    
+            except ValueError:
+                print(f"Invalid input. Please enter numbers separated by commas (e.g., '{available_options[0]}')")
+    
+    def get_task_due_date_with_suggestion(self, task_desc: str, suggested_due: str) -> Optional[str]:
+        """Get due date for a task with AI suggestion"""
+        if suggested_due:
+            prompt = f"Due date for '{task_desc}' (suggested: {suggested_due}, or YYYY-MM-DD, or Enter to skip): "
+        else:
+            prompt = f"Due date for '{task_desc}' (YYYY-MM-DD, or Enter to skip): "
+        
+        due_date = input(prompt).strip()
+        return due_date if due_date else None

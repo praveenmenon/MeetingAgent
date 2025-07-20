@@ -14,6 +14,8 @@ Meeting Agent is a Python application that transforms meeting transcripts into s
 - 🔍 **Smart Similarity**: Find and link related meetings using AI
 - 💬 **Q&A Mode**: Query your meeting history with natural language
 - 🏷️ **Tagging System**: Organize meetings by type, topics, and status
+- 🧠 **Intelligent Memory**: AI-powered memory using Mem0 for personalized assistance
+- 📚 **Learning System**: Learns from your interactions to improve over time
 
 ## Project Structure
 
@@ -27,7 +29,8 @@ Meeting_Agent/
 │       ├── notion_client.py     # Notion API client
 │       ├── ai_client.py         # AI services (OpenAI, Claude)
 │       ├── ui.py                # User interface helpers
-│       └── task_manager.py      # Task creation and management
+│       ├── task_manager.py      # Task creation and management
+│       └── memory_client.py     # Memory management with Mem0
 ├── config/
 │   └── .env.example             # Environment variables template
 ├── docs/
@@ -72,6 +75,11 @@ ANTHROPIC_API_KEY=your_anthropic_api_key
 
 # Optional Settings
 DEFAULT_ASSIGNEE=Your Name
+
+# Memory Configuration (Optional)
+MEM0_API_KEY=your_mem0_api_key
+DEFAULT_USER_ID=your_unique_user_id
+MEMORY_ENABLED=true
 ```
 
 ### Setting up Notion
@@ -101,6 +109,25 @@ DEFAULT_ASSIGNEE=Your Name
 3. **Share databases with your integration**
    - Click "Share" on each database
    - Invite your integration
+
+### Setting up Memory (Optional)
+
+To enable intelligent memory features:
+
+1. **Get Mem0 API Key**
+   - Sign up at [Mem0.ai](https://mem0.ai)
+   - Get your API key from the dashboard
+
+2. **Configure Memory Settings**
+   - Add `MEM0_API_KEY` to your `.env` file
+   - Set `DEFAULT_USER_ID` to a unique identifier (e.g., your email)
+   - Keep `MEMORY_ENABLED=true`
+
+3. **Benefits of Memory**
+   - Personalized meeting summaries
+   - Better task suggestions based on history
+   - Contextual Q&A responses
+   - Learning from your preferences over time
 
 ## Usage
 
@@ -137,6 +164,12 @@ After creating a meeting, you can:
 - "What decisions were made about the project timeline?"
 - "Add these action items as tasks"
 - "Show me meetings about budget planning"
+- "memory stats" (if memory is enabled)
+
+**Memory-Enhanced Features:**
+- Personalized responses based on your meeting history
+- Context-aware answers using past interactions
+- Learning from your preferences and patterns
 
 ### Task Creation
 
@@ -155,6 +188,7 @@ Tasks are automatically:
 - **OpenAI API Key**: For transcript processing and Q&A
 - **Anthropic API Key**: For meeting similarity analysis
 - **Notion Integration Token**: For database operations
+- **Mem0 API Key** (Optional): For intelligent memory features
 
 ## Dependencies
 
@@ -162,6 +196,7 @@ Tasks are automatically:
 - `anthropic` - Anthropic API client
 - `requests` - HTTP requests for Notion API
 - `python-dotenv` - Environment variable management
+- `mem0ai` - Intelligent memory for AI agents
 
 ## Development
 
