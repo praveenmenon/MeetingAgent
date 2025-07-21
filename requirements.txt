@@ -2,3 +2,6 @@ openai>=1.0.0
 anthropic>=0.7.0
 requests>=2.31.0
 python-dotenv>=1.0.0
+mem0ai>=0.1.13
+redis>=4.0.0
+asyncio

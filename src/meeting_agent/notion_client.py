@@ -90,7 +90,7 @@ class NotionClient:
         if response.status_code != 200:
             raise ValueError(f"Error appending blocks: {response.text}")
     
-    def create_task_page(self, task_desc: str, assignee_name: str, due_date: Optional[str], meeting_id: str) -> str:
+    def create_task_page(self, task_desc: str, assignee_name: str, due_date: Optional[str], meeting_id: str, priority: Optional[str] = None) -> str:
         """Create a new task page in Notion"""
         # Get available status options and choose appropriate one
         available_statuses = self.get_available_status_options()
@@ -106,6 +106,10 @@ class NotionClient:
         # Only add due date if provided
         if due_date:
             properties["Due Date"] = {"date": {"start": due_date}}
+        
+        # Only add priority if provided
+        if priority:
+            properties["Priority"] = {"select": {"name": priority}}
         
         data = {
             "parent": {"database_id": self.tasks_database_id},
@@ -131,7 +135,13 @@ class NotionClient:
             headers=self.headers
         ).json()
         
-        current_relations = current_page['properties']['Action Items']['relation']
+        # Check if Action Items property exists and get current relations
+        try:
+            current_relations = current_page['properties']['Action Items']['relation']
+        except KeyError:
+            # If Action Items property doesn't exist, start with empty relations
+            current_relations = []
+        
         updated_relations = current_relations + [{"id": task_id} for task_id in task_ids]
         
         patch_data = {

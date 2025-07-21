@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: meeting-agent-redis
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - meeting-agent-network
+    restart: unless-stopped
+
+  meeting-agent:
+    build: .
+    container_name: meeting-agent
+    env_file:
+      - config/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - ENABLE_ASYNC_PROCESSING=false  # Set to true to enable async processing
+    volumes:
+      # Mount config directory for easy environment variable updates
+      - ./config:/app/config:ro
+      # Optional: Mount a logs directory if you want to persist logs
+      - ./logs:/app/logs
+    stdin_open: true  # Enable interactive mode
+    tty: true         # Allocate a pseudo-TTY
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - meeting-agent-network
+
+  meeting-worker:
+    build: .
+    container_name: meeting-agent-worker
+    env_file:
+      - config/.env
+    environment:
+      - REDIS_URL=redis://redis:6379
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+    command: python worker.py
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - meeting-agent-network
+    profiles:
+      - worker  # Only start when using worker profile
+
+volumes:
+  redis_data:
+
+networks:
+  meeting-agent-network:
+    driver: bridge
