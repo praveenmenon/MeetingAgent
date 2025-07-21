@@ -57,14 +57,8 @@ setup(
     },
     entry_points={
         "console_scripts": [
-            "meeting-agent=meeting_agent.cli:main",
-            "meeting-worker=meeting_agent.worker:main",
-            "meeting-config=meeting_agent.config_manager:main",
-            "meeting-monitor=meeting_agent.monitor:main",
+            "meeting-agent=meeting_agent.main:main",
         ],
     },
     include_package_data=True,
-    package_data={
-        "meeting_agent": ["config/*.yaml", "templates/*.txt"],
-    },
 )
