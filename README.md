@@ -1,21 +1,162 @@
 # Meeting Agent
 
-AI-powered meeting transcription and task management with Notion integration.
+[![CI/CD Pipeline](https://github.com/yourusername/meeting-agent/workflows/CI%2FCD%20Pipeline/badge.svg)](https://github.com/yourusername/meeting-agent/actions)
+[![Coverage](https://codecov.io/gh/yourusername/meeting-agent/branch/main/graph/badge.svg)](https://codecov.io/gh/yourusername/meeting-agent)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Overview
+A production-ready, AI-powered meeting transcription and task management system that transforms meeting notes into actionable insights using OpenAI and Anthropic APIs, with intelligent Notion integration.
 
-Meeting Agent is a Python application that transforms meeting transcripts into structured notes, automatically creates tasks from action items, and manages everything in your Notion workspace. It uses OpenAI's GPT models for transcript processing and Anthropic's Claude for similarity analysis.
+## 🚀 Features
 
-## Features
+### Core Functionality
+- **AI-Powered Transcription**: Transform raw meeting transcripts into structured, professional notes
+- **Smart Task Generation**: Automatically extract and create action items from meeting discussions
+- **Notion Integration**: Seamlessly sync with your existing Notion workspace
+- **Memory System**: Learn from previous meetings for better context and suggestions
+- **Similarity Detection**: Find related meetings and group discussions automatically
 
-- 🎯 **Transcript Processing**: Convert raw meeting transcripts into structured notes
-- 📝 **Notion Integration**: Automatically create and organize meeting pages in Notion
-- ✅ **Task Management**: Extract action items and create tasks with due dates
-- 🔍 **Smart Similarity**: Find and link related meetings using AI
-- 💬 **Q&A Mode**: Query your meeting history with natural language
-- 🏷️ **Tagging System**: Organize meetings by type, topics, and status
-- 🧠 **Intelligent Memory**: AI-powered memory using Mem0 for personalized assistance
-- 📚 **Learning System**: Learns from your interactions to improve over time
+### Advanced Capabilities
+- **Async Processing**: Handle large transcripts with background workers
+- **Rate Limiting**: Intelligent API quota management with exponential backoff
+- **Chunking Algorithm**: Process meetings of any size with speaker-aware segmentation
+- **Multi-Model Support**: Leverage both OpenAI and Anthropic models for optimal results
+- **Real-time Monitoring**: Track API usage, queue status, and system health
+
+### Production Features
+- **Docker Support**: Containerized deployment with Redis backing
+- **Configuration Management**: Environment-based configuration with validation
+- **Comprehensive Logging**: Structured logging with multiple output formats
+- **Error Recovery**: Graceful handling of API failures and network issues
+- **Test Coverage**: Extensive unit and integration test suite
+
+## 📦 Installation
+
+### Quick Start with Docker
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/meeting-agent.git
+cd meeting-agent
+
+# Copy and configure environment
+cp config/.env.example config/.env
+# Edit config/.env with your API keys
+
+# Run with Docker Compose
+docker-compose up --build
+```
+
+### Local Development
+```bash
+# Install dependencies
+pip install -e .[dev]
+
+# Run tests
+pytest
+
+# Start the application
+meeting-agent
+```
+
+## 🔧 Configuration
+
+### Required Environment Variables
+```bash
+# Notion Integration
+NOTION_TOKEN=secret_your_notion_token
+DATABASE_ID=your_meetings_database_id
+TASKS_DATABASE_ID=your_tasks_database_id
+
+# AI Services
+OPENAI_API_KEY=sk-your_openai_key
+ANTHROPIC_API_KEY=your_anthropic_key
+
+# Optional: Memory & Async Processing
+MEM0_API_KEY=your_mem0_key
+REDIS_URL=redis://localhost:6379
+ENABLE_ASYNC_PROCESSING=false
+```
+
+### Advanced Configuration
+The system supports extensive configuration through environment variables:
+
+- **AI Model Parameters**: Per-task temperature, max tokens, model selection
+- **Rate Limiting**: Retry strategies, backoff timing, quota management  
+- **Async Processing**: Queue sizes, worker timeouts, chunk parameters
+- **Logging**: Levels, formats, file rotation, structured output
+
+See [Configuration Guide](docs/guides/configuration.md) for complete details.
+
+## 🎯 Usage
+
+### Basic Workflow
+1. **Start the Application**: Run `meeting-agent` or use Docker
+2. **Paste Transcript**: Input your meeting transcript (supports multi-line)
+3. **Review Generated Notes**: AI creates structured meeting notes
+4. **Manage Tasks**: Create action items from identified tasks
+5. **Sync with Notion**: Automatically updates your Notion databases
+
+### Advanced Features
+
+#### Async Processing for Large Meetings
+```bash
+# Enable async processing
+export ENABLE_ASYNC_PROCESSING=true
+
+# Start worker
+meeting-worker
+
+# Process large transcripts in background
+meeting-agent
+```
+
+#### Rate Limit Monitoring
+```bash
+# Check current API status
+meeting-monitor status
+
+# Watch in real-time
+meeting-monitor watch --interval 10
+
+# Process queued requests
+meeting-monitor process --max-requests 20
+```
+
+#### AI Configuration Management
+```bash
+# View current AI settings
+meeting-config show
+
+# Optimize for accuracy (legal/medical)
+meeting-config update summarization temperature 0.1
+
+# Enable creative task suggestions
+meeting-config update task_suggestion temperature 0.8
+```
+
+## 🏗️ Architecture
+
+```
+┌─────────────────┐    ┌───────────────┐    ┌─────────────────┐
+│   CLI Interface │───▶│  Rate Limiter │───▶│   AI Services   │
+│                 │    │               │    │  OpenAI/Claude  │
+└─────────────────┘    └───────────────┘    └─────────────────┘
+         │                       │                      │
+         ▼                       ▼                      ▼
+┌─────────────────┐    ┌───────────────┐    ┌─────────────────┐
+│ Notion Client   │    │ Redis Queue   │    │ Memory System   │
+│                 │    │ (Async Jobs)  │    │ (Context/Learning)│
+└─────────────────┘    └───────────────┘    └─────────────────┘
+```
+
+### Key Components
+
+- **AI Client**: Multi-provider AI integration with intelligent routing
+- **Rate Limiter**: Exponential backoff with jitter and request queuing
+- **Task Manager**: Smart action item extraction and creation
+- **Chunking System**: Speaker-aware transcript segmentation
+- **Memory Client**: Context learning and meeting similarity detection
+- **Configuration System**: Pydantic-based validation and management
 
 ## Project Structure
 

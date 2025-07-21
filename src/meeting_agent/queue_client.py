@@ -90,7 +90,8 @@ class QueueClient:
                 result = self.get_job_result(job_id)
                 raise Exception(f"Job failed: {result.get('error', 'Unknown error')}")
             
-            await asyncio.sleep(1)
+            import time
+            time.sleep(1)
         
         raise TimeoutError(f"Job {job_id} did not complete within {timeout} seconds")
 
