@@ -31,38 +31,37 @@ dependencies = [
     "anthropic>=0.7.0",
     "requests>=2.31.0",
     "python-dotenv>=1.0.0",
-    "mem0ai>=0.1.13",
+    "pydantic-settings>=0.3.0",
+    "mem0ai>=0.1.7",
     "redis>=4.0.0",
     "pydantic>=2.0.0",
-    "click>=8.0.0",
-    "rich>=13.0.0",
+    "rich>=10.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.10.0",
+    "pytest>=6.0.0",
+    "pytest-asyncio>=0.20.0",
+    "pytest-cov>=3.0.0",
+    "pytest-mock>=3.8.0",
     "black>=22.0.0",
     "isort>=5.10.0",
-    "flake8>=5.0.0",
-    "mypy>=1.0.0",
+    "flake8>=4.0.0",
+    "mypy>=0.991",
     "pre-commit>=2.20.0",
+    "rich>=10.0.0",
+    "psutil>=5.8.0",
 ]
 
 test = [
-    "pytest>=7.0.0",
-    "pytest-asyncio>=0.21.0",
-    "pytest-cov>=4.0.0",
-    "pytest-mock>=3.10.0",
+    "pytest>=6.0.0",
+    "pytest-asyncio>=0.20.0",
+    "pytest-cov>=3.0.0",
+    "pytest-mock>=3.8.0",
 ]
 
 [project.scripts]
-meeting-agent = "meeting_agent.cli:main"
-meeting-worker = "meeting_agent.worker:main"
-meeting-config = "meeting_agent.config_manager:main"
-meeting-monitor = "meeting_agent.monitor:main"
+meeting-agent = "meeting_agent.main:main"
 
 [project.urls]
 Homepage = "https://github.com/yourusername/meeting-agent"
@@ -121,7 +120,7 @@ module = [
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
-minversion = "7.0"
+minversion = "6.0"
 addopts = [
     "-ra",
     "--strict-markers",
