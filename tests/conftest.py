@@ -6,11 +6,12 @@ import asyncio
 import json
 import os
 import tempfile
-from typing import Dict, Any, Generator
-from unittest.mock import Mock, MagicMock
+from typing import Any, Dict, Generator
+from unittest.mock import MagicMock, Mock
 
 import pytest
 import redis
+
 from meeting_agent.ai_client import AIClient
 from meeting_agent.ai_config import AIConfig, TaskType
 from meeting_agent.config import Config
@@ -50,10 +51,10 @@ def mock_env_vars(monkeypatch):
         "DEFAULT_USER_ID": "test_user_123",
         "REDIS_URL": "redis://localhost:6379",
     }
-    
+
     for key, value in test_env.items():
         monkeypatch.setenv(key, value)
-    
+
     return test_env
 
 
@@ -142,14 +143,14 @@ def sample_tasks():
             "title": "Fix login bug",
             "priority": "High",
             "suggested_due_date": "2023-12-22",
-            "reason": "Critical bug affecting user experience"
+            "reason": "Critical bug affecting user experience",
         },
         {
             "title": "Update documentation",
-            "priority": "Medium", 
+            "priority": "Medium",
             "suggested_due_date": "2023-12-25",
-            "reason": "Keep docs up to date with new feature"
-        }
+            "reason": "Keep docs up to date with new feature",
+        },
     ]
 
 
@@ -159,19 +160,11 @@ def mock_notion_response():
     return {
         "id": "test_page_id_123",
         "properties": {
-            "Title": {
-                "title": [{"text": {"content": "Test Meeting"}}]
-            },
-            "Description": {
-                "rich_text": [{"text": {"content": "Test description"}}]
-            },
-            "Meeting Type": {
-                "select": {"name": "Weekly Sync"}
-            },
-            "Status": {
-                "select": {"name": "Completed"}
-            }
-        }
+            "Title": {"title": [{"text": {"content": "Test Meeting"}}]},
+            "Description": {"rich_text": [{"text": {"content": "Test description"}}]},
+            "Meeting Type": {"select": {"name": "Weekly Sync"}},
+            "Status": {"select": {"name": "Completed"}},
+        },
     }
 
 
@@ -194,16 +187,20 @@ def retry_config():
         max_delay=1.0,
         rate_limit_delay=0.5,
         quota_exceeded_delay=1.0,
-        jitter=False  # Disable for predictable testing
+        jitter=False,  # Disable for predictable testing
     )
 
 
 @pytest.fixture
 def mock_ai_client(mock_openai_client, mock_anthropic_client, ai_config):
     """Mock AI client with all dependencies."""
-    with pytest.mock.patch('meeting_agent.ai_client.OPENAI_CLIENT', mock_openai_client):
-        with pytest.mock.patch('meeting_agent.ai_client.ANTHROPIC_CLIENT', mock_anthropic_client):
-            with pytest.mock.patch('meeting_agent.ai_client.get_ai_config', return_value=ai_config):
+    with pytest.mock.patch("meeting_agent.ai_client.OPENAI_CLIENT", mock_openai_client):
+        with pytest.mock.patch(
+            "meeting_agent.ai_client.ANTHROPIC_CLIENT", mock_anthropic_client
+        ):
+            with pytest.mock.patch(
+                "meeting_agent.ai_client.get_ai_config", return_value=ai_config
+            ):
                 client = AIClient()
                 return client
 
@@ -231,7 +228,7 @@ def mock_memory_client():
     mock_client.get_relevant_context.return_value = []
     mock_client.get_memory_stats.return_value = {
         "total_memories": 10,
-        "categories": {"meetings": 8, "tasks": 2}
+        "categories": {"meetings": 8, "tasks": 2},
     }
     return mock_client
 
@@ -266,7 +263,7 @@ def integration_config():
     return {
         "use_real_apis": os.getenv("INTEGRATION_TESTS", "false").lower() == "true",
         "redis_url": os.getenv("TEST_REDIS_URL", "redis://localhost:6379"),
-        "test_timeout": 30
+        "test_timeout": 30,
     }
 
 
@@ -278,20 +275,20 @@ def sample_chunks():
             "id": 1,
             "text": "[10:00] John (PM): Good morning everyone. Let's start with updates.",
             "size": 67,
-            "speaker_count": 1
+            "speaker_count": 1,
         },
         {
-            "id": 2, 
+            "id": 2,
             "text": "[10:01] Alice (Dev): I completed the user authentication feature.",
             "size": 62,
-            "speaker_count": 1
+            "speaker_count": 1,
         },
         {
             "id": 3,
             "text": "[10:02] Bob (QA): I've tested the login flow, found one minor bug.",
             "size": 64,
-            "speaker_count": 1
-        }
+            "speaker_count": 1,
+        },
     ]
 
 
@@ -301,15 +298,9 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: marks tests as slow (deselect with '-m \"not slow\"')"
     )
-    config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests"
-    )
-    config.addinivalue_line(
-        "markers", "unit: marks tests as unit tests"
-    )
-    config.addinivalue_line(
-        "markers", "api: marks tests that make real API calls"
-    )
+    config.addinivalue_line("markers", "integration: marks tests as integration tests")
+    config.addinivalue_line("markers", "unit: marks tests as unit tests")
+    config.addinivalue_line("markers", "api: marks tests that make real API calls")
 
 
 # Pytest collection hooks
@@ -317,9 +308,11 @@ def pytest_collection_modifyitems(config, items):
     """Modify test collection to add markers automatically."""
     for item in items:
         # Add unit marker to all tests by default
-        if not any(mark.name in ["integration", "api", "slow"] for mark in item.iter_markers()):
+        if not any(
+            mark.name in ["integration", "api", "slow"] for mark in item.iter_markers()
+        ):
             item.add_marker(pytest.mark.unit)
-        
+
         # Add slow marker to tests with 'slow' in name
         if "slow" in item.name or "integration" in str(item.fspath):
             item.add_marker(pytest.mark.slow)
@@ -331,16 +324,16 @@ def generate_test_transcript(num_speakers: int = 3, num_exchanges: int = 5) -> s
     speakers = [f"Speaker{i}" for i in range(1, num_speakers + 1)]
     transcript_lines = [
         "Meeting Title: Generated Test Meeting",
-        "Date: 2023-12-15", 
-        f"Attendees: {', '.join(speakers)}"
+        "Date: 2023-12-15",
+        f"Attendees: {', '.join(speakers)}",
     ]
-    
+
     for i in range(num_exchanges):
         speaker = speakers[i % len(speakers)]
         timestamp = f"[10:{i:02d}]"
         message = f"This is message {i+1} from {speaker}"
         transcript_lines.append(f"{timestamp} {speaker}: {message}")
-    
+
     return "\n".join(transcript_lines)
 
 
