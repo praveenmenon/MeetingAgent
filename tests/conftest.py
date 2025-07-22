@@ -14,7 +14,7 @@ import redis
 
 from meeting_agent.ai_client import AIClient
 from meeting_agent.ai_config import AIConfig, TaskType
-from meeting_agent.config import Config
+from meeting_agent.config import ConfigManager, ApplicationConfig
 from meeting_agent.memory_client import MemoryClient
 from meeting_agent.notion_client import NotionClient
 from meeting_agent.rate_limiter import RateLimiter, RetryConfig
